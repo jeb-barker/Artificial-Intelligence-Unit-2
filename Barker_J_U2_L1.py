@@ -126,6 +126,7 @@ def main():
 
     # solve the map coloring problem by using backtracking_search -- no additional code for this part
     solution = backtracking_search(variables, adjacents, shapes, frame)
+    # node_check = sum([1 for x in variables if x not in solution])
     print(solution)
 
     mainloop()
