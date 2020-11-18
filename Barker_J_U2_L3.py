@@ -1,6 +1,7 @@
 # Name: Jeb Barker
 # Date: 11-13-2020
 import copy
+import time
 
 
 def check_complete(assignment, csp_table):
@@ -56,7 +57,7 @@ def recursive_backtracking(assignment, variables, csp_table):
     var = select_unassigned_var(assignment, variables, csp_table)
     if var == None:
         return None
-    for value in sorted([a for a in variables[var]]):
+    for value in variables[var]:
         # if isValid(value, var, assignment, variables, csp_table):
         ass = list(assignment)
         ass[var] = str(value)
@@ -116,12 +117,13 @@ def main():
     while len(puzzle) != 81:
         print("Invalid puzzle")
         puzzle = input("Type a 81-char string: ")
+    cur_time = time.time()
     csp_table = sudoku_csp()
     variables = initial_variables(puzzle, csp_table)
     print("Initial:\n" + display(puzzle))
     solution = backtracking_search(puzzle, variables, csp_table)
     if solution != None:
-        print("solution\n" + display(solution))
+        print("solution\n" + display(solution), "\n\nDuration: ", (time.time() - cur_time))
     else:
         print("No solution found.\n")
 
@@ -135,7 +137,7 @@ if __name__ == '__main__':
 # .......1.4.........2...........5.4.7..8...3....1.9....3..4..2...5.1........8.6...
 # 000000010400000000020000000000050604008000300001090000300400200050100000000807000
 # 000000012000035000000600070700000300000400800100000000000120000080000040050000600
-# 000000012003600000000007000410020000000500300700000600280000040000300500000000000
+# .......12..36..........7...41..2.......5..3..7.....6..28.....4....3..5...........
 # 000000012008030000000000040120500000000004700060000000507000300000620000000100000
 # .......12.4..5.........9....7.6..4.....1............5.....875..6.1...3..2........
 # '683942615495382672125567944936258427548711369741693858319475286854129733272836591'
@@ -311,4 +313,5 @@ if __name__ == '__main__':
 080103040
 ========
 .8...5........3457....7.8.9.6.4..9.3..7.1.5..4.8..7.2.9.1.2....8423........1...8.
+.....5.8....6.1.43..........1.5........1.6...3.......553.....61........4......... 
 """
