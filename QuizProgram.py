@@ -100,7 +100,7 @@ def main():
                     out += str(index) + " "
             print(out)
 
-    print("\n" + str(len(solSet)))
+    print("\n" + str(len(solSet)-1))
     print("\nduration: " + str(time.time()-time1))
 
 
