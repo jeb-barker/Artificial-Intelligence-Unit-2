@@ -120,7 +120,7 @@ def main():
         cur_time = time.time()
         csp_table = sudoku_csp()
 
-        with open("longpuzzles") as f:
+        with open("sudoku_puzzles") as f:
             for puzzle in f.readlines():
                 cur_time = time.time()
                 variables = initial_variables(puzzle, csp_table)
