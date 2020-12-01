@@ -2,68 +2,57 @@
 # Date:
 import os, time
 
-def initial_variables(puzzle, csp_table):
+
+def initial_variables(puzzle, csp_table, neighbors):
     out = {}
     for x in range(0, 81):
         out[x] = {y for y in range(1, 10)} if puzzle[x] == "." else {int(puzzle[x])}
     for var in out:
         for val in out[var]:
             if len(out[var]) == 1:
-                update_variables(val, var, puzzle, out, csp_table)
+                update_variables(val, var, puzzle, out, csp_table, neighbors)
     return out
 
-def check_complete(assignment, csp_table):
+
+def check_complete(assignment, csp_table, neighbors):
     if assignment.find('.') != -1: return False
-
-    for adj in csp_table:
-        if len(set([assignment[i] for i in adj])) != 9: return False  # TODO? add case for '.'
-    return True
-
-
-def select_unassigned_var(assignment, variables, csp_table):
-    smol = None
-    for index, var in enumerate(assignment):
-        if var == '.':
-            if not smol:
-                smol = index
-            elif len(variables[index]) < len(variables[smol]):
-                smol = index
-    return smol
-
-
-def isValid(value, var_index, assignment, variables, csp_table):
-    for adj in csp_table:
-        if var_index in adj:
-            hTemp = set()
-            for index in adj:
-                hTemp.add(assignment[index])
-            if value in hTemp:
-                return False
-    return True
+    if checksum(assignment) == 405:
+        return True
+    return False
+    # for adj in csp_table:
+    #     if len(set([assignment[i] for i in adj])) != 9: return False  # TODO? add case for '.'
+    # return True
 
 
 def ordered_domain(assignment, variables, csp_table):
     return []
 
 
-def update_variables(value, var_index, assignment, variables, csp_table):
+def select_unassigned_var(assignment, variables, csp_table, neighbors):
+    smol = None
+    for index, var in enumerate(assignment):
+        if var == '.':
+            if not smol:
+                smol = index
+            # elif len(variables[index]) == 1:
+            #     return index
+            elif len(variables[index]) < len(variables[smol]):
+                smol = index
+    return smol
+
+
+def update_variables(value, var_index, assignment, variables, csp_table, neighbors):
     # out = {}
-    for adj in csp_table:
-        if var_index in adj:
-            for var in adj:
-                if value in variables[var] and var != var_index:
-                    variables[var] = {a for a in variables[var] if a != value}
+    for var in neighbors[var_index]:
+        if value in variables[var]:
+            variables[var] = {a for a in variables[var] if a != value}
     return variables
 
 
-def backtracking_search(puzzle, variables, csp_table):
-    return recursive_backtracking(puzzle, variables, csp_table)
-
-
-def recursive_backtracking(assignment, variables, csp_table):
-    if check_complete(assignment, csp_table):
+def recursive_backtracking(assignment, variables, csp_table, neighbors):
+    if check_complete(assignment, csp_table, neighbors):
         return assignment
-    var = select_unassigned_var(assignment, variables, csp_table)
+    var = select_unassigned_var(assignment, variables, csp_table, neighbors)
     if var is None:
         return None
     for value in variables[var]:
@@ -71,9 +60,9 @@ def recursive_backtracking(assignment, variables, csp_table):
         ass = list(assignment)
         ass[var] = str(value)
         assignment = "".join(ass)
-        variablesbutcooler = {a: b for a, b in variables.items()} # variables.deepcopy()
-        variablesbutcooler = update_variables(value, var, assignment, variablesbutcooler, csp_table)
-        result = recursive_backtracking(assignment, variablesbutcooler, csp_table)
+        variablesbutcooler = variables.copy()# {a: b for a, b in variables.items()} # variables.deepcopy()
+        variablesbutcooler = update_variables(value, var, assignment, variablesbutcooler, csp_table, neighbors)
+        result = recursive_backtracking(assignment, variablesbutcooler, csp_table, neighbors)
         if result:
             return result
         else:
@@ -94,18 +83,25 @@ def display(solution):
         if i == 80: result += "\n----------------------"
     return result
 
-def solve(puzzle, variables, csp_table):
+def solve(puzzle, variables, csp_table, neighbors):
     ''' suggestion:
     # q_table is quantity table {'1': number of value '1' occurred, ...}
     variables, puzzle, q_table = initialize_ds(puzzle, neighbors)
     return recursive_backtracking(puzzle, variables, neighbors, q_table)
     '''
-    return recursive_backtracking(puzzle, variables, csp_table)
+    return recursive_backtracking(puzzle, variables, csp_table, neighbors)
 
 
 def sudoku_neighbors(csp_table):
     # each position p has its neighbors {p:[positions in same row/col/subblock], ...}
-    return csp_table
+    out = {x: set() for x in range(0,81)}
+    for index in range(0, 81):
+        for box in csp_table:
+            if index in box:
+                for xdex in box:
+                    if xdex != index:
+                        out[index].add(xdex)
+    return out
 
 
 def sudoku_csp(n=9):
@@ -130,11 +126,11 @@ def main():
         csp_table)  # each position p has its neighbors {p:[positions in same row/col/subblock], ...}
     start_time = time.time()
     for line, puzzle in enumerate(open(filename).readlines()):
-        if line == 50: break  # check point: goal is less than 0.5 sec
+        # if line == 50: break  # check point: goal is less than 0.5 sec
         line, puzzle = line + 1, puzzle.rstrip()
         print("Line {}: {}".format(line, puzzle))
-        variables = initial_variables(puzzle, csp_table)
-        solution = solve(puzzle, variables, csp_table)
+        variables = initial_variables(puzzle, csp_table, neighbors)
+        solution = solve(puzzle, variables, csp_table, neighbors)
         if solution == None: print("No solution found."); break
         print("{}({}, {})".format(" " * (len(str(line)) + 1), checksum(solution), solution))
     print("Duration:", (time.time() - start_time))
