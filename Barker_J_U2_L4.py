@@ -14,13 +14,12 @@ def initial_variables(puzzle, csp_table, neighbors):
     return out
 
 
-def check_complete(assignment, csp_table, neighbors):
+def check_complete(assignment):
     if "." in assignment:
         return False
     elif checksum(assignment) == 405:
         return True
-    else:
-        return False
+    return False
     # for adj in csp_table:
     #     if len(set([assignment[i] for i in adj])) != 9: return False  # TODO? add case for '.'
     # return True
@@ -30,15 +29,14 @@ def ordered_domain(assignment, variables, freq):
     return sorted(variables, key=lambda a: 9-freq[a], reverse=False)
 
 
-def select_unassigned_var(assignment, variables, csp_table, neighbors):
+def select_unassigned_var(assignment, variables):
     smol = None
     for index, var in enumerate(assignment):
         if var == '.':
-            # if len(variables[index]) == 1:
-                # return index
-            if not smol:
-                smol = index
-            elif len(variables[index]) < len(variables[smol]):
+            try:
+                if len(variables[index]) < len(variables[smol]):
+                    smol = index
+            except KeyError:
                 smol = index
     return smol
 
@@ -54,41 +52,20 @@ def update_variables(value, var_index, assignment, variables, csp_table, neighbo
 
 
 def recursive_backtracking(assignment, variables, csp_table, neighbors):
-    if check_complete(assignment, csp_table, neighbors):
+    if check_complete(assignment):
         assignment = "".join(assignment)
         return assignment
-    var = select_unassigned_var(assignment, variables, csp_table, neighbors)
-    # if var is None:
-    #     return None
-    for value in variables[var]:  # ordered_domain(assignment, variables[var], freq):
-        # if isValid(value, var, assignment, variables, csp_table):
-        # ass = list(assignment)
+    var = select_unassigned_var(assignment, variables)
+    for value in variables[var]:
         assignment[var] = str(value)
-        # freq[value] += 1
-        # assignment = "".join(ass)
         variablesbutcooler = variables.copy()  # {a: b for a, b in variables.items()} # variables.deepcopy()
         variablesbutcooler = update_variables(value, var, assignment, variablesbutcooler, csp_table, neighbors)
         result = recursive_backtracking(assignment, variablesbutcooler, csp_table, neighbors)
         if result:
             return result
         else:
-            # ass = list(assignment)
             assignment[var] = "."
-            # freq[value] -= 1
-            # assignment = "".join(ass)
     return None
-
-
-def display(solution):
-    result = ""
-    for i in range(len(solution)):
-        if i % 27 == 0 and i % 9 == 0 and i != 0: result += "\n"
-        if i % 3 == 0 and i % 9 != 0: result += "  "  # Tab instead?
-        if i % 9 == 0 and i !=0: result += "\n"
-        if i == 0: result += "----------------------\n"
-        result += solution[i] + " "
-        if i == 80: result += "\n----------------------"
-    return result
 
 
 def solve(puzzle, variables, csp_table, neighbors):
