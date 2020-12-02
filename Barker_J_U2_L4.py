@@ -15,7 +15,7 @@ def initial_variables(puzzle, csp_table, neighbors):
 
 
 def check_complete(assignment, csp_table, neighbors):
-    if assignment.find('.') != -1:
+    if "." in assignment:
         return False
     elif checksum(assignment) == 405:
         return True
@@ -26,8 +26,8 @@ def check_complete(assignment, csp_table, neighbors):
     # return True
 
 
-def ordered_domain(assignment, variables, csp_table):
-    return []
+def ordered_domain(assignment, variables, freq):
+    return sorted(variables, key=lambda a: 9-freq[a], reverse=False)
 
 
 def select_unassigned_var(assignment, variables, csp_table, neighbors):
@@ -35,7 +35,7 @@ def select_unassigned_var(assignment, variables, csp_table, neighbors):
     for index, var in enumerate(assignment):
         if var == '.':
             # if len(variables[index]) == 1:
-            #     return index
+                # return index
             if not smol:
                 smol = index
             elif len(variables[index]) < len(variables[smol]):
@@ -44,33 +44,38 @@ def select_unassigned_var(assignment, variables, csp_table, neighbors):
 
 
 def update_variables(value, var_index, assignment, variables, csp_table, neighbors):
-    # out = {}
     for var in neighbors[var_index]:
         if value in variables[var]:
-            variables[var] = {a for a in variables[var] if a != value}
+            # variables[var] = {a for a in variables[var] if a != value}
+            c = variables[var].copy()
+            c.remove(value)
+            variables[var] = c
     return variables
 
 
 def recursive_backtracking(assignment, variables, csp_table, neighbors):
     if check_complete(assignment, csp_table, neighbors):
+        assignment = "".join(assignment)
         return assignment
     var = select_unassigned_var(assignment, variables, csp_table, neighbors)
-    if var is None:
-        return None
-    for value in variables[var]:
+    # if var is None:
+    #     return None
+    for value in variables[var]:  # ordered_domain(assignment, variables[var], freq):
         # if isValid(value, var, assignment, variables, csp_table):
-        ass = list(assignment)
-        ass[var] = str(value)
-        assignment = "".join(ass)
-        variablesbutcooler = variables.copy()# {a: b for a, b in variables.items()} # variables.deepcopy()
+        # ass = list(assignment)
+        assignment[var] = str(value)
+        # freq[value] += 1
+        # assignment = "".join(ass)
+        variablesbutcooler = variables.copy()  # {a: b for a, b in variables.items()} # variables.deepcopy()
         variablesbutcooler = update_variables(value, var, assignment, variablesbutcooler, csp_table, neighbors)
         result = recursive_backtracking(assignment, variablesbutcooler, csp_table, neighbors)
         if result:
             return result
         else:
-            ass = list(assignment)
-            ass[var] = "."
-            assignment = "".join(ass)
+            # ass = list(assignment)
+            assignment[var] = "."
+            # freq[value] -= 1
+            # assignment = "".join(ass)
     return None
 
 
@@ -85,13 +90,14 @@ def display(solution):
         if i == 80: result += "\n----------------------"
     return result
 
+
 def solve(puzzle, variables, csp_table, neighbors):
     ''' suggestion:
     # q_table is quantity table {'1': number of value '1' occurred, ...}
     variables, puzzle, q_table = initialize_ds(puzzle, neighbors)
     return recursive_backtracking(puzzle, variables, neighbors, q_table)
     '''
-    return recursive_backtracking(puzzle, variables, csp_table, neighbors)
+    return recursive_backtracking(list(puzzle), variables, csp_table, neighbors)
 
 
 def sudoku_neighbors(csp_table):
@@ -131,6 +137,7 @@ def main():
         # if line == 50: break  # check point: goal is less than 0.5 sec
         line, puzzle = line + 1, puzzle.rstrip()
         print("Line {}: {}".format(line, puzzle))
+        freq = {}
         variables = initial_variables(puzzle, csp_table, neighbors)
         solution = solve(puzzle, variables, csp_table, neighbors)
         if solution == None: print("No solution found."); break
