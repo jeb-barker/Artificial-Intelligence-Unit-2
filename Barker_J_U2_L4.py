@@ -15,10 +15,12 @@ def initial_variables(puzzle, csp_table, neighbors):
 
 
 def check_complete(assignment, csp_table, neighbors):
-    if assignment.find('.') != -1: return False
-    if checksum(assignment) == 405:
+    if assignment.find('.') != -1:
+        return False
+    elif checksum(assignment) == 405:
         return True
-    return False
+    else:
+        return False
     # for adj in csp_table:
     #     if len(set([assignment[i] for i in adj])) != 9: return False  # TODO? add case for '.'
     # return True
@@ -32,10 +34,10 @@ def select_unassigned_var(assignment, variables, csp_table, neighbors):
     smol = None
     for index, var in enumerate(assignment):
         if var == '.':
+            # if len(variables[index]) == 1:
+            #     return index
             if not smol:
                 smol = index
-            # elif len(variables[index]) == 1:
-            #     return index
             elif len(variables[index]) < len(variables[smol]):
                 smol = index
     return smol
