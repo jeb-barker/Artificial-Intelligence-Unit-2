@@ -1,6 +1,6 @@
 # Name: Jeb Barker
 # Date:
-import os, time
+import os, time, copy
 
 
 def initial_variables(puzzle, csp_table, neighbors):
@@ -52,7 +52,7 @@ def update_variables(value, var_index, assignment, variables, csp_table, neighbo
     return variables
 
 
-def recursive_backtracking(assignment, variables, csp_table, neighbors):
+def recursive_backtracking(assignment, variables, csp_table_temp, neighbors):
     if check_complete(assignment):
         assignment = "".join(assignment)
         return assignment
@@ -60,8 +60,8 @@ def recursive_backtracking(assignment, variables, csp_table, neighbors):
     for value in variables[var]:
         assignment[var] = str(value)
         variablesbutcooler = variables.copy()  # {a: b for a, b in variables.items()} # variables.deepcopy()
-        variablesbutcooler = update_variables(value, var, assignment, variablesbutcooler, csp_table, neighbors)
-        result = recursive_backtracking(assignment, variablesbutcooler, csp_table, neighbors)
+        variablesbutcooler = update_variables(value, var, assignment, variablesbutcooler, csp_table_temp, neighbors)
+        result = recursive_backtracking(assignment, variablesbutcooler, csp_table_temp, neighbors)
         if result:
             return result
         else:
@@ -92,11 +92,11 @@ def sudoku_neighbors(csp_table):
 
 
 def sudoku_csp(n=9):
-    csp_table = [[k for k in range(i * n, (i + 1) * n)] for i in range(n)]  # rows
-    csp_table += [[k for k in range(i, n * n, n)] for i in range(n)]  # cols
+    csp_table_temp = [[k for k in range(i * n, (i + 1) * n)] for i in range(n)]  # rows
+    csp_table_temp += [[k for k in range(i, n * n, n)] for i in range(n)]  # cols
     temp = [0, 1, 2, 9, 10, 11, 18, 19, 20]
-    csp_table += [[i + k for k in temp] for i in [0, 3, 6, 27, 30, 33, 54, 57, 60]]  # sub_blocks
-    return csp_table
+    csp_table_temp += [[i + k for k in temp] for i in [0, 3, 6, 27, 30, 33, 54, 57, 60]]  # sub_blocks
+    return csp_table_temp
 
 
 def checksum(solution):
