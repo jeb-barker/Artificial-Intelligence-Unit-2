@@ -31,13 +31,13 @@ def ordered_domain(assignment, variables, freq):
 
 def select_unassigned_var(assignment, variables):
     smol = None
-    for index, var in enumerate(assignment):
-        if var == '.':
+    for x in range(81):
+        if assignment[x] == '.':
             try:
-                if len(variables[index]) < len(variables[smol]):
-                    smol = index
+                if len(variables[x]) < len(variables[smol]):
+                    smol = x
             except KeyError:
-                smol = index
+                smol = x
     return smol
     # return assignment.index(min([(a, b) for a, b in enumerate(assignment)], key=lambda val: len(variables[val[0]]) if val[1] != "." else 10)[1])
 
