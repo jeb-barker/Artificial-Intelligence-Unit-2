@@ -39,6 +39,7 @@ def select_unassigned_var(assignment, variables):
             except KeyError:
                 smol = index
     return smol
+    # return assignment.index(min([(a, b) for a, b in enumerate(assignment)], key=lambda val: len(variables[val[0]]) if val[1] != "." else 10)[1])
 
 
 def update_variables(value, var_index, assignment, variables, csp_table, neighbors):
