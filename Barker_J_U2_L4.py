@@ -1,4 +1,4 @@
-# Name:
+# Name: Jeb Barker
 # Date:
 import os, time
 
@@ -26,7 +26,7 @@ def check_complete(assignment):
 
 
 def ordered_domain(assignment, variables, freq):
-    return sorted(variables, key=lambda a: 9-freq[a], reverse=False)
+    return sorted(variables, key=lambda a: 9 - freq[a], reverse=False)
 
 
 def select_unassigned_var(assignment, variables):
@@ -69,18 +69,19 @@ def recursive_backtracking(assignment, variables, csp_table, neighbors):
     return None
 
 
-def solve(puzzle, variables, csp_table, neighbors):
+def solve(puzzle, neighbors):
     ''' suggestion:
     # q_table is quantity table {'1': number of value '1' occurred, ...}
     variables, puzzle, q_table = initialize_ds(puzzle, neighbors)
     return recursive_backtracking(puzzle, variables, neighbors, q_table)
     '''
+    variables = initial_variables(puzzle, csp_table, neighbors)
     return recursive_backtracking(list(puzzle), variables, csp_table, neighbors)
 
 
 def sudoku_neighbors(csp_table):
     # each position p has its neighbors {p:[positions in same row/col/subblock], ...}
-    out = {x: set() for x in range(0,81)}
+    out = {x: set() for x in range(0, 81)}
     for index in range(0, 81):
         for box in csp_table:
             if index in box:
@@ -102,12 +103,13 @@ def checksum(solution):
     return sum([ord(c) for c in solution]) - 48 * 81  # One easy way to check a valid solution
 
 
+csp_table = sudoku_csp(9)
+
+
 def main():
     filename = input("file name: ")
     if not os.path.isfile(filename):
         filename = "puzzles.txt"
-    csp_table = sudoku_csp()  # rows, cols, and sub_blocks
-
     neighbors = sudoku_neighbors(
         csp_table)  # each position p has its neighbors {p:[positions in same row/col/subblock], ...}
     start_time = time.time()
@@ -115,9 +117,7 @@ def main():
         # if line == 50: break  # check point: goal is less than 0.5 sec
         line, puzzle = line + 1, puzzle.rstrip()
         print("Line {}: {}".format(line, puzzle))
-        freq = {}
-        variables = initial_variables(puzzle, csp_table, neighbors)
-        solution = solve(puzzle, variables, csp_table, neighbors)
+        solution = solve(puzzle, neighbors)
         if solution == None: print("No solution found."); break
         print("{}({}, {})".format(" " * (len(str(line)) + 1), checksum(solution), solution))
     print("Duration:", (time.time() - start_time))
